@@ -1,21 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Calendar
 {
@@ -25,12 +14,17 @@ namespace Calendar
     public partial class CalendarControl : UserControl, INotifyPropertyChanged
     {
         MouseButtonEventHandler OutsideHandler;
-        public ObservableCollection<CalendarData> CalendarList { get; set; }
+        //public ObservableCollection<CalendarData> CalendarList { get; set; }
+        public ObservableCollection<DateTime> CalendarList { get; set; }
+        public DateTime SelectedCalendarData { get; set; }
+
         private DateTime _selectedDate;
         public DateTime SelectedDate
         {
             get
             {
+                if (_selectedDate == null)
+                    return DateTime.Now;
                 return _selectedDate;
             }
             set
@@ -52,7 +46,7 @@ namespace Calendar
 
         private void InitCalendarData(DateTime beginDate)
         {
-            CalendarList = new ObservableCollection<CalendarData>();
+            CalendarList = new ObservableCollection<DateTime>();
 
             // first to show is date 1
             beginDate = beginDate.Subtract(TimeSpan.FromDays(beginDate.Day - 1));
@@ -63,10 +57,12 @@ namespace Calendar
 
             for (int i = 0; i < 49; i++)
             {
-                DateTime date = beginDate.AddDays(i); 
-                CalendarList.Add(new CalendarData() { CurrentDateTime = date, ParentDateTime = SelectedDate, IsSelected = SelectedDate == date }); 
+                DateTime date = beginDate.AddDays(i);
+                CalendarList.Add(date);
+                //CalendarList.Add(new CalendarData() { CurrentDateTime = date, ParentDateTime = SelectedDate, IsSelected = SelectedDate == date }); 
             }
-            CalendarListBox.ItemsSource = CalendarList; 
+            RaisePropertyChanged("CalendarList");
+            //CalendarListBox.ItemsSource = CalendarList; 
         } 
 
         private void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -84,21 +80,23 @@ namespace Calendar
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (e.AddedItems.Count != 0) { 
-                foreach (CalendarData cal in CalendarList)
-                {
-                    cal.IsSelected = false;
-                } 
+            if (e.AddedItems.Count > 0 && e.RemovedItems.Count > 0)
+            {
+                DateTime oldVal = (DateTime)e.RemovedItems[0];
+                DateTime newVal = (DateTime)e.AddedItems[0];
+
+                if (oldVal.Month != newVal.Month)
+                    InitCalendarData(SelectedDate);
             } 
 
-            foreach (CalendarData cal in e.AddedItems)
-            {
-                cal.IsSelected = true;
-                SelectedDate = cal.CurrentDateTime;
-                Storyboard s = (Storyboard)TryFindResource("CollapseCalendarStoryboard");
-                s.Begin();
-                break;
-            } 
+            //foreach (CalendarData cal in e.AddedItems)
+            //{
+            //    cal.IsSelected = true;
+            //    SelectedDate = cal.CurrentDateTime;
+            //    Storyboard s = (Storyboard)TryFindResource("CollapseCalendarStoryboard");
+            //    s.Begin();
+            //    break;
+            //} 
         }
          
         public void CollapseCalendar()
@@ -122,9 +120,7 @@ namespace Calendar
             else 
             {
                 Storyboard s = (Storyboard)TryFindResource("ExpandCalendarStoryboard");
-                s.Begin();
-
-                AddMouseCapture(); 
+                s.Begin(); 
             }  
         }
 
@@ -153,102 +149,18 @@ namespace Calendar
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        private void OnCalendarLoaded(object sender, RoutedEventArgs e)
+        {
+            CalendarListBox.SelectedItem = DateTime.Now;
+            AddMouseCapture();
+        }
+
+        private void OnCalendarUnLoaded(object sender, RoutedEventArgs e)
+        {
+            ReleaseMouseCapture();
         } 
 
-    }
-
-    public class CalendarData : INotifyPropertyChanged
-    {
-        public DateTime ParentDateTime { get; set; }
-        public Brush ForegroundColor
-        {
-            get
-            {
-                return (ParentDateTime.Month == CurrentDateTime.Month || IsSelected) ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Gray);
-            }
-        }
-        public bool IsShowLeftBorder
-        {
-            get
-            {
-                return CurrentDateTime.Day == 1;
-            }
-        }
-        public bool IsShowTopBorder
-        {
-            get
-            {
-                return CurrentDateTime.Day <= 7;
-            }
-        }
-        private bool _isSelected;
-        public bool IsSelected
-        {
-            get
-            {
-                return _isSelected;
-            }
-            set
-            {
-                _isSelected = value;
-                RaisePropertyChanged("IsSelected");
-                RaisePropertyChanged("ShowMonth");
-                RaisePropertyChanged("HideMonth");
-                RaisePropertyChanged("ForegroundColor");
-            }
-        }
-        public bool HideMonth
-        {
-            get
-            {
-                return !ShowMonth;
-            }
-        }
-    
-        public bool ShowMonth
-        {
-            get
-            {
-                return CurrentDateTime.Day == 1 || IsSelected;
-            }
-        }
-        private DateTime _currentDateTime;
-        public DateTime CurrentDateTime
-        {
-            get
-            {
-                return _currentDateTime;
-            }
-            set
-            {
-                _currentDateTime = value;
-            }
-        }
-        public String CurrentMonth
-        {
-            get
-            {
-                return CurrentDateTime.ToString("MMM", new CultureInfo("en-GB"));
-            }
-        }
-        public int CurrentDate
-        {
-            get
-            {
-                return CurrentDateTime.Day;
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void RaisePropertyChanged(string propertyName)
-        {
-            // take a copy to prevent thread issues
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
-        } 
-        
-    } 
+    }  
 }

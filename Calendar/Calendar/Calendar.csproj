@@ -71,6 +71,12 @@
     </Compile>
     <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Converters\CalendarFormatConverter.cs" />
+    <Compile Include="Converters\CustomCalendarConverter\DateTimeToForegroundConverter.cs" />
+    <Compile Include="Converters\CustomCalendarConverter\IsSelectedToVisibilityConverter.cs" />
+    <Compile Include="Converters\CustomCalendarConverter\ShowMonthConverter.cs" />
+    <Compile Include="Converters\DateTimeToMonthConverter.cs" />
+    <Compile Include="Converters\DateTimeToDayConverter.cs" />
+    <Compile Include="Converters\ReverseVisibilityConverter.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

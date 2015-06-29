@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:conv="clr-namespace:Calendar.Converters"
+             xmlns:cconv="clr-namespace:Calendar.Converters.CustomCalendarConverter"
              mc:Ignorable="d" 
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              d:DesignHeight="300" d:DesignWidth="300">
@@ -11,10 +12,17 @@
     <UserControl.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVisibility"></conv:BoolToVisibilityConverter>
         <conv:CalendarFormatConverter x:Key="CalendarFormatConverter"></conv:CalendarFormatConverter>
+        <conv:DateTimeToDayConverter x:Key="DateTimeToDayConverter"/>
+        <conv:ReverseVisibilityConverter x:Key="ReverseVisibilityConverter"/>
+        <conv:DateTimeToMonthConverter x:Key="DateTimeToMonthConverter"/>
+        <cconv:ShowMonthConverter x:Key="ShowMonthConverter"/>
+        <cconv:DateTimeToForegroundConverter x:Key="DateTimeToForegroundConverter" />
+        <cconv:IsSelectedToVisibilityConverter x:Key="IsSelectedToVisibilityConverter"/>
+        
+        
         <Storyboard x:Key="ExpandCalendarStoryboard">
         	<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" Storyboard.TargetName="CalendarGridContainer">
-        		<EasingDoubleKeyFrame KeyTime="0" Value="0">
-                     
+        		<EasingDoubleKeyFrame KeyTime="0" Value="0">                     
                 </EasingDoubleKeyFrame>
         		<EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1">  
                 </EasingDoubleKeyFrame>
@@ -60,20 +68,18 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition> 
-        </Grid.RowDefinitions>
-
-        
+        </Grid.RowDefinitions> 
         
         <Grid Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="CalTextBox" IsReadOnly="True" Text="{Binding SelectedDate, Converter={StaticResource CalendarFormatConverter}}" FontSize="15" MinHeight="30" Margin="0,0,10,0" VerticalAlignment="Center"></TextBox>
-            <Image Grid.Column="1" Source="Resources/calendar3.png" Width="30" Height="30" VerticalAlignment="Center" MouseDown="OnCalendarClicked"></Image>
+            <!--<TextBox x:Name="CalTextBox" IsReadOnly="True" Text="{Binding SelectedDate, Converter={StaticResource CalendarFormatConverter}}" FontSize="15" MinHeight="30" Margin="0,0,10,0" VerticalAlignment="Center"></TextBox>-->
+            <!--<Image Grid.Column="1" Source="Resources/calendar3.png" Width="30" Height="30" VerticalAlignment="Center" MouseDown="OnCalendarClicked"></Image>-->
         </Grid>
         
-        <Grid Grid.Row="1" Name="CalendarGridContainer" RenderTransformOrigin="0.5,0.5" Visibility="Collapsed">
+        <Grid Grid.Row="1" Name="CalendarGridContainer" RenderTransformOrigin="0.5,0.5" Visibility="Visible">
         	<Grid.RenderTransform>
         		<TransformGroup>
         			<ScaleTransform/>
@@ -88,7 +94,6 @@
             </Grid.RowDefinitions>
 
         <Rectangle Fill="#333333" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.RowSpan="2" Margin="-5" RadiusX="10" RadiusY="10"></Rectangle>
-
             <ListView x:Name="CalendarHeaderListBox" Width="{Binding ElementName=CalendarListBox, Path=ActualWidth}" HorizontalContentAlignment="Stretch" Background="Transparent" BorderThickness="0">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -114,7 +119,9 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <ListView x:Name="CalendarListBox" SelectedItem="{Binding SelectedCalendarData, Mode=TwoWay}"  Grid.Row="1" Background="Transparent" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" PreviewMouseWheel="OnPreviewMouseWheel" SelectionChanged="OnSelectionChanged" BorderThickness="0">
+            <ListView x:Name="CalendarListBox" Grid.Row="1" Background="Transparent" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" BorderThickness="0"
+                      SelectedItem="{Binding SelectedDate, Mode=TwoWay}" ItemsSource="{Binding CalendarList}" 
+                      PreviewMouseWheel="OnPreviewMouseWheel" SelectionChanged="OnSelectionChanged" Loaded="OnCalendarLoaded" Unloaded="OnCalendarUnLoaded">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid Columns="7" Rows="7" > 
@@ -124,17 +131,43 @@
                 <ListView.ItemTemplate>
                     <DataTemplate>  
                         <Grid Margin="0" HorizontalAlignment="Stretch"> 
-                                <Ellipse Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibility}}" Fill="#6A9BE5" Stretch="UniformToFill" HorizontalAlignment="Stretch"></Ellipse>
-                                <TextBlock Name="DateBig" Visibility="{Binding HideMonth, Converter={StaticResource BoolToVisibility}}" Text="{Binding CurrentDate}" Foreground="{Binding ForegroundColor}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" />
-                                <StackPanel Margin="0" Visibility="{Binding ShowMonth, Converter={StaticResource BoolToVisibility}}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock Name="MonthSmall" Text="{Binding CurrentMonth}" Foreground="{Binding ForegroundColor}" HorizontalAlignment="Center"  />
-                                    <TextBlock Name="DateSmall"  Text="{Binding CurrentDate}" Foreground="{Binding ForegroundColor}" HorizontalAlignment="Center"/> 
-                                </StackPanel>
-                            <Rectangle Stroke="Gray" VerticalAlignment="Top" Margin="-5"  StrokeThickness="1" Visibility="{Binding IsShowTopBorder, Converter={StaticResource BoolToVisibility}}" ></Rectangle>
-                            <Rectangle Stroke="Gray" HorizontalAlignment="Left" Margin="-5, -5, -5, 0"  StrokeThickness="1" Visibility="{Binding IsShowLeftBorder, Converter={StaticResource BoolToVisibility}}" ></Rectangle>
+                            <Ellipse Fill="#6A9BE5" Stretch="UniformToFill" HorizontalAlignment="Stretch">
+                                <Ellipse.Visibility>
+                                    <MultiBinding Converter="{StaticResource IsSelectedToVisibilityConverter}">
+                                        <Binding/>
+                                        <Binding ElementName="CalendarListBox" Path="SelectedItem"></Binding>
+                                    </MultiBinding>
+                                </Ellipse.Visibility>
+                            </Ellipse>
+                            <TextBlock Name="DateBig" Text="{Binding Converter={StaticResource DateTimeToDayConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" >
+                                <TextBlock.Visibility>
+                                    <MultiBinding Converter="{StaticResource ShowMonthConverter}">
+                                        <Binding/>
+                                        <Binding ElementName="CalendarListBox" Path="SelectedItem"/> 
+                                    </MultiBinding>
+                                </TextBlock.Visibility>
+                                <TextBlock.Foreground>
+                                    <MultiBinding Converter="{StaticResource DateTimeToForegroundConverter}">
+                                        <Binding/>
+                                        <Binding ElementName="CalendarListBox" Path="SelectedItem"></Binding>
+                                    </MultiBinding> 
+                                </TextBlock.Foreground>
+                            </TextBlock>
+                            <StackPanel Margin="0" Visibility="{Binding ElementName=DateBig, Path=Visibility, Converter={StaticResource ReverseVisibilityConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Name="MonthSmall" Text="{Binding Converter={StaticResource DateTimeToMonthConverter}}" Foreground="{Binding ElementName=DateBig, Path=Foreground}" HorizontalAlignment="Center"  />
+                                <TextBlock Name="DateSmall"  Text="{Binding ElementName=DateBig, Path=Text}" Foreground="{Binding ElementName=DateBig, Path=Foreground}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <!--<Rectangle Stroke="Gray" VerticalAlignment="Top" Margin="-5"  StrokeThickness="1" Visibility="{Binding IsShowTopBorder, Converter={StaticResource BoolToVisibility}}" ></Rectangle>-->
+                            <!--<Rectangle Stroke="Gray" HorizontalAlignment="Left" Margin="-5, -5, -5, 0"  StrokeThickness="1" Visibility="{Binding IsShowLeftBorder, Converter={StaticResource BoolToVisibility}}" ></Rectangle>-->
                         </Grid>
                     </DataTemplate>
-                </ListView.ItemTemplate> 
+                </ListView.ItemTemplate>
+                <ListBox.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent"/>
+                </ListBox.Resources> 
             </ListView>
         </Grid>
     </Grid>
