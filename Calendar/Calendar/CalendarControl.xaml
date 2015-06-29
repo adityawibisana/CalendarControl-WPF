@@ -17,9 +17,7 @@
         <conv:DateTimeToMonthConverter x:Key="DateTimeToMonthConverter"/>
         <cconv:ShowMonthConverter x:Key="ShowMonthConverter"/>
         <cconv:DateTimeToForegroundConverter x:Key="DateTimeToForegroundConverter" />
-        <cconv:IsSelectedToVisibilityConverter x:Key="IsSelectedToVisibilityConverter"/>
-        
-        
+        <cconv:IsSelectedToVisibilityConverter x:Key="IsSelectedToVisibilityConverter"/> 
         <Storyboard x:Key="ExpandCalendarStoryboard">
         	<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" Storyboard.TargetName="CalendarGridContainer">
         		<EasingDoubleKeyFrame KeyTime="0" Value="0">                     
@@ -62,7 +60,10 @@
                 <DiscreteObjectKeyFrame KeyTime="0:0:0.2" Value="{x:Static Visibility.Collapsed}"/>
             </ObjectAnimationUsingKeyFrames>
         </Storyboard>
+         
     </UserControl.Resources> 
+    
+    
 
     <Grid Width="300"> 
         <Grid.RowDefinitions>
@@ -109,8 +110,13 @@
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
-            </ListView>
-
+                <ListBox.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Black" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent"/>
+                </ListBox.Resources>
+            </ListView> 
             <ListView x:Name="CalendarListBox" Grid.Row="1" Background="Transparent" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" BorderThickness="0"
                       SelectedItem="{Binding SelectedDate, Mode=TwoWay}" ItemsSource="{Binding CalendarList}" 
                       PreviewMouseWheel="OnPreviewMouseWheel" SelectionChanged="OnSelectionChanged" Loaded="OnCalendarLoaded" Unloaded="OnCalendarUnLoaded">

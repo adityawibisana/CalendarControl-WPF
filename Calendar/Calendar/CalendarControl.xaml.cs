@@ -13,8 +13,8 @@ namespace Calendar
     /// </summary>
     public partial class CalendarControl : UserControl, INotifyPropertyChanged
     {
-        MouseButtonEventHandler OutsideHandler;
-        //public ObservableCollection<CalendarData> CalendarList { get; set; }
+        public MouseButtonEventHandler OutsideHandler;
+        
         public ObservableCollection<DateTime> CalendarList { get; set; }
         public ObservableCollection<String> DayList { get; set; }
 
@@ -146,8 +146,8 @@ namespace Calendar
         }
 
         private void HandleClickOutsideOfControl(object sender, MouseButtonEventArgs e)
-        {
-            CollapseCalendar(); 
+        { 
+            //CollapseCalendar();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
