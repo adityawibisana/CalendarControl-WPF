@@ -94,22 +94,14 @@
             </Grid.RowDefinitions>
 
         <Rectangle Fill="#333333" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.RowSpan="2" Margin="-5" RadiusX="10" RadiusY="10"></Rectangle>
-            <ListView x:Name="CalendarHeaderListBox" Width="{Binding ElementName=CalendarListBox, Path=ActualWidth}" HorizontalContentAlignment="Stretch" Background="Transparent" BorderThickness="0">
+            <ListView x:Name="CalendarHeaderListBox" HorizontalContentAlignment="Stretch" Background="Transparent" BorderThickness="0"
+                      Width="{Binding ElementName=CalendarListBox, Path=ActualWidth}" ItemsSource="{Binding DayList}">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid Columns="7" Rows="1" >
                         </UniformGrid>
                     </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
-                <ListView.Items>
-                    <sys:String>Mon</sys:String>
-                    <sys:String>Tue</sys:String>
-                    <sys:String>Wed</sys:String>
-                    <sys:String>Thu</sys:String>
-                    <sys:String>Fri</sys:String>
-                    <sys:String>Sat</sys:String>
-                    <sys:String>Sun</sys:String>
-                </ListView.Items>
+                </ListView.ItemsPanel> 
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="0" HorizontalAlignment="Center"> 

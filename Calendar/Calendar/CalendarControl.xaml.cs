@@ -16,7 +16,7 @@ namespace Calendar
         MouseButtonEventHandler OutsideHandler;
         //public ObservableCollection<CalendarData> CalendarList { get; set; }
         public ObservableCollection<DateTime> CalendarList { get; set; }
-        public DateTime SelectedCalendarData { get; set; }
+        public ObservableCollection<String> DayList { get; set; }
 
         private DateTime _selectedDate;
         public DateTime SelectedDate
@@ -42,6 +42,16 @@ namespace Calendar
 
             SelectedDate = DateTime.Now;
             InitCalendarData(SelectedDate);
+
+            #region init day list (sunday, etc.)
+            DayList = new ObservableCollection<String>();
+            // 3 may is sunday
+            DateTime dt = new DateTime(2015, 5, 3);
+            for (int i = 0; i < 7; i++)
+            {
+                DayList.Add(dt.AddDays(i).ToString("ddd"));
+            }
+            #endregion
         }
 
         private void InitCalendarData(DateTime beginDate)
@@ -160,6 +170,7 @@ namespace Calendar
         private void OnCalendarUnLoaded(object sender, RoutedEventArgs e)
         {
             ReleaseMouseCapture();
+            RemoveHandler(Mouse.PreviewMouseDownOutsideCapturedElementEvent, OutsideHandler);
         } 
 
     }  
