@@ -8,8 +8,12 @@ namespace Calendar.Converters.CustomCalendarConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            DateTime val0 = (DateTime) values[0];
-            DateTime val1 = (DateTime) values[1];
+            DateTime val0 = (DateTime)values[0];
+
+            if (values[1] == null)
+                return new SolidColorBrush(Colors.Gray);
+
+            DateTime val1 = (DateTime)values[1];
 
             if (val0.Month == val1.Month)
                 return new SolidColorBrush(Colors.White);
